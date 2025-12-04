@@ -133,7 +133,7 @@ void overtakeFromRight(int mm) {
   go(100);
 }
 
-void fullSteamAhead(wall_left, wall_right) {
+void fullSteamAhead(int wall_left, int wall_right) {
   // Get the diff of wall sensors to get our position between
   // map it to the range of steering value
   // use it to control the steering
