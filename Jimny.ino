@@ -78,6 +78,9 @@ VL53L0X sensor3;
 VL53L0X sensor4;
 VL53L0X sensor5;
 
+// Moving
+int proportional_speed_coef = 1;
+
 // Steering
 Servo steer;
 const int SERVO = 33;
@@ -123,14 +126,12 @@ uint32_t distanceColor(int mm) {
 
 void overtakeFromLeft(int mm) {
   int v = 400 - map(mm, 0, collision_distance, 0, 400);
-  steer.writeMicroseconds(straight + v);
-  go(100);
+  goSteer(straight + v);
 }
 
 void overtakeFromRight(int mm) {
   int v = 400 - map(mm, 0, collision_distance, 0, 400);
-  steer.writeMicroseconds(straight - v);
-  go(100);
+  goSteer(straight - v);
 }
 
 void fullSteamAhead(int wall_left, int wall_right) {
@@ -140,12 +141,16 @@ void fullSteamAhead(int wall_left, int wall_right) {
   int wall_diff = wall_right - wall_left;
   int steering_value = map(wall_diff, -1200, 1200,max_left, max_right);
 
-  steer.writeMicroseconds(steering_value);
-  go(max_speed);
+  goSteer(steering_value);
 }
 
 void stop() {
   analogWrite(EN, 0);
+}
+
+void goSteer(int steering_value) {
+  steer.writeMicroseconds(steering_value);
+  go(max_speed*proportional_speed_coef);
 }
 
 void go(int s) {
