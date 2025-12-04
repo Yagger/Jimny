@@ -133,8 +133,14 @@ void overtakeFromRight(int mm) {
   go(100);
 }
 
-void fullSteamAhead() {
-  steer.writeMicroseconds(straight);
+void fullSteamAhead(wall_left, wall_right) {
+  // Get the diff of wall sensors to get our position between
+  // map it to the range of steering value
+  // use it to control the steering
+  int wall_diff = wall_right - wall_left;
+  int steering_value = map(wall_diff, -1200, 1200,max_left, max_right);
+
+  steer.writeMicroseconds(steering_value);
   go(max_speed);
 }
 
@@ -289,7 +295,7 @@ void loop() {
       reverseLeft();
     }
   } else if (!cCol && !lCol && !rCol) {
-    fullSteamAhead();
+    fullSteamAhead(wallLeft, wallRight);
   } else if (lCol && cCol && !rCol) {
     overtakeFromRight((center+left)/2);
   } else if (!lCol && cCol && rCol) {
