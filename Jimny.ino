@@ -21,30 +21,33 @@
 #pragma pack(push, 1)  
 
 
-uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 352 bytes V21 
-  { 254,14,0,10,0,0,0,7,0,1,2,0,3,2,0,5,2,0,7,2,
-  0,9,2,0,11,2,0,13,1,0,64,1,21,0,0,0,74,105,109,110,
-  121,0,31,1,106,200,1,1,21,0,67,13,6,24,8,85,2,26,67,41,
-  6,24,8,85,2,26,67,69,6,24,8,85,2,26,67,79,21,24,8,85,
-  2,26,67,4,21,24,8,85,2,26,3,31,24,44,16,131,2,26,7,6,
-  58,40,10,85,64,2,26,7,57,58,40,10,85,64,2,26,7,6,78,40,
-  10,85,64,2,26,7,56,79,40,10,85,64,2,26,7,6,98,40,10,85,
-  64,2,26,7,56,98,40,10,85,64,2,26,4,6,123,93,15,128,2,26,
-  129,6,52,39,5,64,25,99,111,108,108,105,115,105,111,110,32,100,105,115,
-  116,97,110,99,101,0,129,58,52,38,5,64,25,114,101,118,101,114,115,101,
-  32,112,114,111,120,105,109,105,116,121,0,129,6,72,25,5,64,25,109,97,
-  120,32,115,112,101,101,100,0,129,57,73,34,5,64,25,111,118,101,114,116,
-  97,107,101,32,115,112,101,101,100,0,129,6,92,31,5,64,25,114,101,118,
-  101,114,115,101,32,115,112,101,101,100,0,129,57,92,28,5,64,25,114,101,
-  118,101,114,115,101,32,116,105,109,101,0,129,7,115,67,5,64,25,112,114,
-  111,112,111,114,116,105,111,110,97,108,32,115,112,101,101,100,32,99,111,101,
-  102,102,105,99,105,101,110,116,0,129,34,18,40,5,64,25,79,70,70,32,
-  32,32,65,85,84,79,32,32,77,65,78,0 };
+uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 419 bytes V21 
+  { 254,15,0,14,0,0,0,8,0,1,2,0,3,2,0,5,2,0,7,2,
+  0,9,2,0,11,2,0,13,1,0,14,1,0,128,1,21,0,0,0,74,
+  105,109,110,121,0,31,1,106,200,1,1,25,0,67,13,6,24,8,85,2,
+  26,67,41,6,24,8,85,2,26,67,69,6,24,8,85,2,26,67,79,21,
+  24,8,85,2,26,67,4,21,24,8,85,2,26,3,31,24,44,16,131,2,
+  26,7,6,58,40,10,85,64,2,26,7,57,58,40,10,85,64,2,26,7,
+  6,78,40,10,85,64,2,26,7,56,79,40,10,85,64,2,26,7,6,98,
+  40,10,85,64,2,26,7,56,98,40,10,85,64,2,26,4,6,123,93,15,
+  128,2,26,129,6,52,39,5,64,25,99,111,108,108,105,115,105,111,110,32,
+  100,105,115,116,97,110,99,101,0,129,58,52,38,5,64,25,114,101,118,101,
+  114,115,101,32,112,114,111,120,105,109,105,116,121,0,129,6,72,25,5,64,
+  25,109,97,120,32,115,112,101,101,100,0,129,57,73,34,5,64,25,111,118,
+  101,114,116,97,107,101,32,115,112,101,101,100,0,129,6,92,31,5,64,25,
+  114,101,118,101,114,115,101,32,115,112,101,101,100,0,129,57,92,28,5,64,
+  25,114,101,118,101,114,115,101,32,116,105,109,101,0,129,7,115,67,5,64,
+  25,112,114,111,112,111,114,116,105,111,110,97,108,32,115,112,101,101,100,32,
+  99,111,101,102,102,105,99,105,101,110,116,0,129,34,18,40,5,64,25,79,
+  70,70,32,32,32,65,85,84,79,32,32,77,65,78,0,67,7,183,40,10,
+  78,2,26,3,129,8,176,26,5,64,25,115,112,101,101,100,32,100,101,108,
+  116,97,0,4,6,149,93,15,128,2,26,129,8,142,43,5,64,25,115,116,
+  101,101,114,105,110,103,32,99,111,101,102,102,105,99,105,101,110,116,0 };
   
 // this structure defines all the variables and events of your control interface 
 struct {
 
-  // input variables
+    // input variables
   uint8_t mode; // from 0 to 3
   int16_t collision_distance; // -32768 .. +32767
   int16_t reverse_proximity; // -32768 .. +32767
@@ -53,15 +56,17 @@ struct {
   int16_t reverse_speed; // -32768 .. +32767
   int16_t reverse_time; // -32768 .. +32767
   int8_t proportional_speed_coef; // from 0 to 100
+  int8_t steering_coef; // from 0 to 100
 
-  // output variables
+    // output variables
   int16_t left; // -32768 .. +32767
   int16_t center; // -32768 .. +32767
   int16_t right; // -32768 .. +32767
   int16_t wall_right; // -32768 .. +32767
   int16_t wall_left; // -32768 .. +32767
+  float speed_delta;
 
-} RemoteXY;
+} RemoteXY;   
 
 
 #pragma pack(pop)
@@ -74,6 +79,7 @@ struct {
 #include <VL53L0X.h>
 #include <Adafruit_NeoPixel.h>
 #include <ESP32Servo.h>
+#include <PID_v2.h>
 
 #define LED_PIN D5
 #define LED_COUNT 6
@@ -127,23 +133,39 @@ uint32_t distanceColor(int mm) {
 
 void overtakeFromLeft(int mm) {
   int v = 400 - map(mm, 0, RemoteXY.collision_distance, 0, 400);
-  steer.writeMicroseconds(straight + v);
-  go(RemoteXY.overtake_speed);
+  goSteer(straight + v);
 }
 
 void overtakeFromRight(int mm) {
   int v = 400 - map(mm, 0, RemoteXY.collision_distance, 0, 400);
-  steer.writeMicroseconds(straight - v);
-  go(RemoteXY.overtake_speed);
+  goSteer(straight - v);
 }
 
-void fullSteamAhead() {
-  steer.writeMicroseconds(straight);
-  go(RemoteXY.max_speed);
+void fullSteamAhead(int wall_left, int wall_right) {
+  // Get the diff of wall sensors to get our position between
+  // map it to the range of steering value
+  // use it to control the steering
+  if (wall_right > 1200) wall_right = 1200;
+  if (wall_left > 1200) wall_left = 1200;
+  int wall_diff = wall_right - wall_left;
+  int steering_value = map(wall_diff, -1200, 1200, max_left, max_right);
+  float steering_coef = map(RemoteXY.steering_coef, 0, 100, 0, 200) / 100;
+  goSteer(steering_value * steering_coef);
 }
 
 void stop() {
   analogWrite(EN, 0);
+}
+
+void goSteer(int steering_value) {
+  RemoteXY.speed_delta = steering_value;
+  if (steering_value < max_right) steering_value = max_right;
+  if (steering_value > max_left) steering_value = max_left;
+  steer.writeMicroseconds(steering_value);
+  // int steering_delta = abs(straight - steering_value);
+  // RemoteXY.speed_delta = map(steering_delta, 0, 400, 0, 150) * (float)RemoteXY.proportional_speed_coef / 100.0;
+  // go(RemoteXY.max_speed - RemoteXY.speed_delta);
+  go(RemoteXY.max_speed);
 }
 
 void go(int s) {
@@ -163,7 +185,7 @@ void reverse_(int steering_value) {
   stop();
   steer.writeMicroseconds(steering_value);
   RemoteXYEngine.delay(300);
-  goRev(100);
+  goRev(RemoteXY.reverse_speed);
   RemoteXYEngine.delay(600);
 }
 
@@ -199,6 +221,9 @@ struct MovingAverage {
 };
 MovingAverage wallRightMA, rightMA, centerMA, leftMA, wallLeftMA;
 
+
+double consKp = 1, consKi = 0.05, consKd = 0.25;
+PID_v2 myPID(consKp, consKi, consKd, PID::Direct);
 
 void setup() {
   Serial.begin(115200);
@@ -246,6 +271,11 @@ void setup() {
   sensor3.startContinuous(5);
   sensor4.startContinuous(5);
   sensor5.startContinuous(5);
+
+  // PID
+  myPID.Start(0,    // input
+              1400, // current output
+              0);   // setpoint
 }
 
 void loop() {
@@ -258,6 +288,7 @@ void loop() {
   // RemoteXY.reverse_speed = 100;
   // RemoteXY.reverse_time = 600;
   // RemoteXY.proportional_speed_coef = 50;
+  // RemoteXY.steering_coef = 50;
 
   RemoteXY.wall_right = wallRightMA.update(sensor1.readRangeContinuousMillimeters());
   RemoteXY.right = rightMA.update(sensor2.readRangeContinuousMillimeters());
@@ -291,9 +322,9 @@ void loop() {
       reverseLeft();
     }
   } else if (!L && !C && !R) {
-    fullSteamAhead();
+    fullSteamAhead(RemoteXY.wall_left, RemoteXY.wall_right);
   } else if (L && !C && R) {
-    fullSteamAhead();
+    fullSteamAhead(RemoteXY.wall_left, RemoteXY.wall_right);
   } else if (L && C && !R) {
     overtakeFromRight((RemoteXY.center+RemoteXY.left)/2);
   } else if (L && !C && !R) {
@@ -302,11 +333,17 @@ void loop() {
     overtakeFromLeft((RemoteXY.center + RemoteXY.right)/2);
   } else if (!L && !C && R) {
     overtakeFromLeft(RemoteXY.right);
-  } else {  // (!L && C && !R) || (L && C && R)
+  } else if (!L && C && !R) {
     if (RemoteXY.wall_left > RemoteXY.wall_right) {
-      overtakeFromLeft(0);
+      overtakeFromLeft(RemoteXY.center);
     } else {
-      overtakeFromRight(0);
+      overtakeFromRight(RemoteXY.center);
+    }
+  } else if (L && C && R) {
+    if (RemoteXY.wall_left > RemoteXY.wall_right) {
+      overtakeFromLeft(RemoteXY.center);
+    } else {
+      overtakeFromRight(RemoteXY.center);
     }
   }
   
