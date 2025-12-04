@@ -12,49 +12,58 @@
 #include <EEPROM.h>
 
 // RemoteXY connection settings 
-#define REMOTEXY_BLUETOOTH_NAME "Jimmy"
+#define REMOTEXY_BLUETOOTH_NAME "Jimny"
 
 
 #include <RemoteXY.h>
 
 // RemoteXY GUI configuration  
 #pragma pack(push, 1)  
-uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 276 bytes V21 
-  { 254,7,0,32,0,0,0,4,0,3,1,0,4,1,0,5,1,0,6,1,
-  0,253,0,21,0,0,0,0,31,1,106,200,2,1,0,9,0,2,33,26,
-  44,22,0,2,26,31,31,79,78,0,79,70,70,0,67,4,6,22,8,78,
-  2,26,2,67,42,6,22,8,78,2,26,2,67,78,6,22,8,78,2,26,
-  2,67,4,61,22,8,78,2,26,2,67,79,61,22,8,78,2,26,2,5,
-  12,86,83,83,32,2,26,31,131,7,180,40,14,2,17,2,31,67,111,110,
-  116,114,111,108,0,9,131,61,180,40,14,2,17,2,31,83,101,116,117,112,
-  0,6,12,0,130,4,45,97,132,27,17,4,77,69,12,86,0,2,26,4,
-  46,70,12,86,0,2,26,4,13,70,12,86,0,2,26,129,21,52,62,12,
-  64,8,84,117,114,110,105,110,103,32,80,73,68,0,4,7,19,94,13,128,
-  2,26,129,36,3,34,12,64,8,83,112,101,101,100,0,67,8,164,25,10,
-  78,2,26,2,67,39,164,25,10,78,2,26,2,67,71,164,25,10,78,2,
-  26,2,131,4,181,40,14,2,17,2,31,67,111,110,116,114,111,108,0,9,
-  131,58,181,40,14,2,17,2,31,83,101,116,117,112,0,6 };
+
+
+uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 352 bytes V21 
+  { 254,14,0,10,0,0,0,7,0,1,2,0,3,2,0,5,2,0,7,2,
+  0,9,2,0,11,2,0,13,1,0,64,1,21,0,0,0,74,105,109,110,
+  121,0,31,1,106,200,1,1,21,0,67,13,6,24,8,85,2,26,67,41,
+  6,24,8,85,2,26,67,69,6,24,8,85,2,26,67,79,21,24,8,85,
+  2,26,67,4,21,24,8,85,2,26,3,31,24,44,16,131,2,26,7,6,
+  58,40,10,85,64,2,26,7,57,58,40,10,85,64,2,26,7,6,78,40,
+  10,85,64,2,26,7,56,79,40,10,85,64,2,26,7,6,98,40,10,85,
+  64,2,26,7,56,98,40,10,85,64,2,26,4,6,123,93,15,128,2,26,
+  129,6,52,39,5,64,25,99,111,108,108,105,115,105,111,110,32,100,105,115,
+  116,97,110,99,101,0,129,58,52,38,5,64,25,114,101,118,101,114,115,101,
+  32,112,114,111,120,105,109,105,116,121,0,129,6,72,25,5,64,25,109,97,
+  120,32,115,112,101,101,100,0,129,57,73,34,5,64,25,111,118,101,114,116,
+  97,107,101,32,115,112,101,101,100,0,129,6,92,31,5,64,25,114,101,118,
+  101,114,115,101,32,115,112,101,101,100,0,129,57,92,28,5,64,25,114,101,
+  118,101,114,115,101,32,116,105,109,101,0,129,7,115,67,5,64,25,112,114,
+  111,112,111,114,116,105,111,110,97,108,32,115,112,101,101,100,32,99,111,101,
+  102,102,105,99,105,101,110,116,0,129,34,18,40,5,64,25,79,70,70,32,
+  32,32,65,85,84,79,32,32,77,65,78,0 };
   
 // this structure defines all the variables and events of your control interface 
 struct {
-    // input variables
-  uint8_t auto_enabled; // =1 if switch ON and =0 if OFF, from 0 to 1
-  int8_t turn; // from -100 to 100
-  int8_t move; // from -100 to 100
-  int8_t const_d; // from 0 to 100
-  int8_t const_i; // from 0 to 100
-  int8_t const_p; // from 0 to 100
-  int8_t set_speed; // from 0 to 100
-    // output variables
-  float front_left_dist;
-  float front_center_dist;
-  float front_right_dist;
-  float side_left_dist;
-  float side_right_dist;
-  float const_p_val;
-  float const_i_val;
-  float const_d_val;
-} RemoteXY;   
+
+  // input variables
+  uint8_t mode; // from 0 to 3
+  int16_t collision_distance; // -32768 .. +32767
+  int16_t reverse_proximity; // -32768 .. +32767
+  int16_t max_speed; // -32768 .. +32767
+  int16_t overtake_speed; // -32768 .. +32767
+  int16_t reverse_speed; // -32768 .. +32767
+  int16_t reverse_time; // -32768 .. +32767
+  int8_t proportional_speed_coef; // from 0 to 100
+
+  // output variables
+  int16_t left; // -32768 .. +32767
+  int16_t center; // -32768 .. +32767
+  int16_t right; // -32768 .. +32767
+  int16_t wall_right; // -32768 .. +32767
+  int16_t wall_left; // -32768 .. +32767
+
+} RemoteXY;
+
+
 #pragma pack(pop)
  
 /////////////////////////////////////////////
@@ -84,8 +93,6 @@ const int SERVO = 33;
 const int max_left = 1800;
 const int straight = 1400;
 const int max_right = 1000;
-const int collision_distance = 600;
-const int reverse_proximity = 190;
 
 // XSHUT pins
 const int XSHUT_1 = D0;
@@ -98,9 +105,6 @@ const int XSHUT_5 = D7;
 // Servo throttle;
 const int PH = 4;
 const int EN = 2;
-bool armed = false;
-bool reverse = false;
-const int max_speed = 250;
 
 // Lights
 const int LIGHTS_FRONT = 25;
@@ -122,20 +126,20 @@ uint32_t distanceColor(int mm) {
 }
 
 void overtakeFromLeft(int mm) {
-  int v = 400 - map(mm, 0, collision_distance, 0, 400);
+  int v = 400 - map(mm, 0, RemoteXY.collision_distance, 0, 400);
   steer.writeMicroseconds(straight + v);
-  go(100);
+  go(RemoteXY.overtake_speed);
 }
 
 void overtakeFromRight(int mm) {
-  int v = 400 - map(mm, 0, collision_distance, 0, 400);
+  int v = 400 - map(mm, 0, RemoteXY.collision_distance, 0, 400);
   steer.writeMicroseconds(straight - v);
-  go(100);
+  go(RemoteXY.overtake_speed);
 }
 
 void fullSteamAhead() {
   steer.writeMicroseconds(straight);
-  go(max_speed);
+  go(RemoteXY.max_speed);
 }
 
 void stop() {
@@ -143,13 +147,13 @@ void stop() {
 }
 
 void go(int s) {
-  if (!armed) return;
+  if (!isArmed()) {stop();return;}
   digitalWrite(PH, HIGH);
   analogWrite(EN, s);
 }
 
 void goRev(int s) {
-  if (!armed) return;
+  if (!isArmed()) {stop();return;}
   digitalWrite(PH, LOW);
   analogWrite(EN, s);
 }
@@ -158,9 +162,9 @@ void reverse_(int steering_value) {
   digitalWrite(LIGHTS_REAR, HIGH);
   stop();
   steer.writeMicroseconds(steering_value);
-  delay(300);
+  RemoteXYEngine.delay(300);
   goRev(100);
-  delay(600);
+  RemoteXYEngine.delay(600);
 }
 
 void reverseLeft() {
@@ -171,14 +175,18 @@ void reverseRight() {
   reverse_(max_right);
 }
 
+bool isArmed() {
+  return RemoteXY.mode > 0;
+}
+
 struct MovingAverage {
   static const int N = 3;
   int buf[N];
   int idx = 0;
-  int sum = 0;
+  int16_t sum = 0;
   bool filled = false;
 
-  int update(int v) {
+  int16_t update(int16_t v) {
     sum -= buf[idx];
     buf[idx] = v;
     sum += v;
@@ -194,7 +202,7 @@ MovingAverage wallRightMA, rightMA, centerMA, leftMA, wallLeftMA;
 
 void setup() {
   Serial.begin(115200);
-  RemoteXY_Init ();  // initialization by macros
+  RemoteXY_Init();  // initialization by macros
   EEPROM.begin(RemoteXYEngine.getEepromSize()); // init EEPROM 
   Wire.begin();
 
@@ -223,14 +231,14 @@ void setup() {
   digitalWrite(XSHUT_3, LOW);
   digitalWrite(XSHUT_4, LOW);
   digitalWrite(XSHUT_5, LOW);
-  delay(10);
+  RemoteXYEngine.delay(10);
 
   // Sensor startup
-  digitalWrite(XSHUT_1, HIGH); delay(10); sensor1.init(); sensor1.setAddress(ADDR_1);
-  digitalWrite(XSHUT_2, HIGH); delay(10); sensor2.init(); sensor2.setAddress(ADDR_2);
-  digitalWrite(XSHUT_3, HIGH); delay(10); sensor3.init(); sensor3.setAddress(ADDR_3);
-  digitalWrite(XSHUT_4, HIGH); delay(10); sensor4.init(); sensor4.setAddress(ADDR_4);
-  digitalWrite(XSHUT_5, HIGH); delay(10); sensor5.init(); sensor5.setAddress(ADDR_5);
+  digitalWrite(XSHUT_1, HIGH); RemoteXYEngine.delay(10); sensor1.init(); sensor1.setAddress(ADDR_1);
+  digitalWrite(XSHUT_2, HIGH); RemoteXYEngine.delay(10); sensor2.init(); sensor2.setAddress(ADDR_2);
+  digitalWrite(XSHUT_3, HIGH); RemoteXYEngine.delay(10); sensor3.init(); sensor3.setAddress(ADDR_3);
+  digitalWrite(XSHUT_4, HIGH); RemoteXYEngine.delay(10); sensor4.init(); sensor4.setAddress(ADDR_4);
+  digitalWrite(XSHUT_5, HIGH); RemoteXYEngine.delay(10); sensor5.init(); sensor5.setAddress(ADDR_5);
 
   // Start ranging
   sensor1.startContinuous(5);
@@ -240,72 +248,68 @@ void setup() {
   sensor5.startContinuous(5);
 }
 
-int wallLeft = 2000;
 void loop() {
-  RemoteXYEngine.handler ();
-  int oldWallLeft = wallLeft;
-  int wallRight = wallRightMA.update(sensor1.readRangeContinuousMillimeters());
-  int right = rightMA.update(sensor2.readRangeContinuousMillimeters());
-  int center = centerMA.update(sensor3.readRangeContinuousMillimeters());
-  int left = leftMA.update(sensor4.readRangeContinuousMillimeters());
-  wallLeft = wallLeftMA.update(sensor5.readRangeContinuousMillimeters());
-  // int wallRight = sensor1.readRangeContinuousMillimeters();
-  // int right = sensor2.readRangeContinuousMillimeters();
-  // int center = sensor3.readRangeContinuousMillimeters();
-  // int left = sensor4.readRangeContinuousMillimeters();
-  // wallLeft = sensor5.readRangeContinuousMillimeters();
+  RemoteXYEngine.handler();
+  // Init EEPROM
+  // RemoteXY.collision_distance = 600;
+  // RemoteXY.reverse_proximity = 190;
+  // RemoteXY.max_speed = 250;
+  // RemoteXY.overtake_speed = 150;
+  // RemoteXY.reverse_speed = 100;
+  // RemoteXY.reverse_time = 600;
+  // RemoteXY.proportional_speed_coef = 50;
 
-  // Temp logic to arm vehicle. Cover the left wall sensor.
-  if (!armed && oldWallLeft > 100 && wallLeft < 100) {
-    armed = !armed;
-  }
-  if (reverse) {
-    digitalWrite(PH, LOW);
-  } else {
-    digitalWrite(PH, HIGH);
-  }
+  RemoteXY.wall_right = wallRightMA.update(sensor1.readRangeContinuousMillimeters());
+  RemoteXY.right = rightMA.update(sensor2.readRangeContinuousMillimeters());
+  RemoteXY.center = centerMA.update(sensor3.readRangeContinuousMillimeters());
+  RemoteXY.left = leftMA.update(sensor4.readRangeContinuousMillimeters());
+  RemoteXY.wall_left = wallLeftMA.update(sensor5.readRangeContinuousMillimeters());
 
   // Apply colors
-  if (armed) {
-    leds.setPixelColor(0, leds.ColorHSV(0, 255, 255)); // red
-  } else {
+  if (RemoteXY.mode == 0) {
     leds.setPixelColor(0, leds.ColorHSV(23200, 255, 255)); // green
+  } else if (RemoteXY.mode == 1) {
+    leds.setPixelColor(0, leds.ColorHSV(0, 255, 255)); // red
+  } else if (RemoteXY.mode == 2) {
+    leds.setPixelColor(0, leds.ColorHSV(36400, 255, 255)); // blue
   }
-  leds.setPixelColor(1, distanceColor(wallLeft));
-  leds.setPixelColor(2, distanceColor(left));
-  leds.setPixelColor(3, distanceColor(center));
-  leds.setPixelColor(4, distanceColor(right));
-  leds.setPixelColor(5, distanceColor(wallRight));
+  leds.setPixelColor(1, distanceColor(RemoteXY.wall_left));
+  leds.setPixelColor(2, distanceColor(RemoteXY.left));
+  leds.setPixelColor(3, distanceColor(RemoteXY.center));
+  leds.setPixelColor(4, distanceColor(RemoteXY.right));
+  leds.setPixelColor(5, distanceColor(RemoteXY.wall_right));
   leds.show();
 
   // Control
-  int lCol = left < collision_distance;
-  int cCol = center < collision_distance;
-  int rCol = right < collision_distance;
-  if (center < reverse_proximity) {
-    if (wallLeft > wallRight) {
+  int L = RemoteXY.left < RemoteXY.collision_distance;
+  int C = RemoteXY.center < RemoteXY.collision_distance;
+  int R = RemoteXY.right < RemoteXY.collision_distance;
+  if (RemoteXY.center < RemoteXY.reverse_proximity) {
+    if (RemoteXY.wall_left > RemoteXY.wall_right) {
       reverseRight();
     } else {
       reverseLeft();
     }
-  } else if (!cCol && !lCol && !rCol) {
+  } else if (!L && !C && !R) {
     fullSteamAhead();
-  } else if (lCol && cCol && !rCol) {
-    overtakeFromRight((center+left)/2);
-  } else if (!lCol && cCol && rCol) {
-    overtakeFromLeft((center + right)/2);
-  } else if (lCol && !cCol && !rCol) {
-    overtakeFromRight(left);
-  } else if (!lCol && !cCol && rCol) {
-    overtakeFromLeft(right);
-  } else {
-    if (wallLeft > wallRight) {
+  } else if (L && !C && R) {
+    fullSteamAhead();
+  } else if (L && C && !R) {
+    overtakeFromRight((RemoteXY.center+RemoteXY.left)/2);
+  } else if (L && !C && !R) {
+    overtakeFromRight(RemoteXY.left);
+  } else if (!L && C && R) {
+    overtakeFromLeft((RemoteXY.center + RemoteXY.right)/2);
+  } else if (!L && !C && R) {
+    overtakeFromLeft(RemoteXY.right);
+  } else {  // (!L && C && !R) || (L && C && R)
+    if (RemoteXY.wall_left > RemoteXY.wall_right) {
       overtakeFromLeft(0);
     } else {
       overtakeFromRight(0);
     }
   }
   
-  Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d\n", wallRight, right, center, left, wallLeft);
+  Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", RemoteXY.wall_right, RemoteXY.right, RemoteXY.center, RemoteXY.left, RemoteXY.wall_left, RemoteXY.mode);
   RemoteXYEngine.delay(30);
 }
