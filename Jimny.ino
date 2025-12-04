@@ -10,6 +10,7 @@
 
 #include <BLEDevice.h>
 #include <EEPROM.h>
+#include <PID_v2.h>
 
 // RemoteXY connection settings 
 #define REMOTEXY_BLUETOOTH_NAME "Jimny"
@@ -93,6 +94,9 @@ VL53L0X sensor3;
 VL53L0X sensor4;
 VL53L0X sensor5;
 
+//General
+const int loop_delay = 30;
+
 // Steering
 Servo steer;
 const int SERVO = 33;
@@ -123,6 +127,9 @@ const int LIGHTS_REAR = 32;
 #define ADDR_4 0x33
 #define ADDR_5 0x34
 
+double Kp = 0.7, Ki = 0, Kd=0.07
+PID_v3 straightPID(Kp, Ki, Kd, PID::Direct);
+
 uint32_t distanceColor(int mm) {
   // https://colorpicker.dev/#00aeff
   if (mm < 0) mm = 0;
@@ -148,9 +155,11 @@ void fullSteamAhead(int wall_left, int wall_right) {
   if (wall_right > 1200) wall_right = 1200;
   if (wall_left > 1200) wall_left = 1200;
   int wall_diff = wall_right - wall_left;
-  int steering_value = map(wall_diff, -1200, 1200, max_left, max_right);
-  float steering_coef = map(RemoteXY.steering_coef, 0, 100, 0, 200) / 100;
-  goSteer(steering_value * steering_coef);
+  //int steering_value = map(wall_diff, -1200, 1200, max_left, max_right);
+  //float steering_coef = map(RemoteXY.steering_coef, 0, 100, 0, 200) / 100;
+  const double output = straightPID.Run(wall_diff);
+  const int steering_value = 1400 - 400 * output;
+  goSteer(steering_value); // * steering_coef);
 }
 
 void stop() {
@@ -273,9 +282,11 @@ void setup() {
   sensor5.startContinuous(5);
 
   // PID
-  myPID.Start(0,    // input
+  straightPID.Start(0,    // input
               1400, // current output
               0);   // setpoint
+  straightPID.SetOutputLimits(-1, 1);
+  straightPID.SetSampleTime(loop_delay);3
 }
 
 void loop() {
@@ -348,5 +359,5 @@ void loop() {
   }
   
   Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", RemoteXY.wall_right, RemoteXY.right, RemoteXY.center, RemoteXY.left, RemoteXY.wall_left, RemoteXY.mode);
-  RemoteXYEngine.delay(30);
+  RemoteXYEngine.delay(loop_delay);
 }
