@@ -11,9 +11,12 @@ void setup() {
   steer.attach(SERVO);
   steer.writeMicroseconds(straight);
 
-  leds.begin();
-  leds.show();
+  leds.init();
   leds.setBrightness(50);
+  leds.setSpeed(200);
+  leds.setMode(FX_MODE_SCAN);
+  leds.start();
+
 
   // Setup pins
   pinMode(XSHUT_1, OUTPUT);

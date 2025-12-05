@@ -28,6 +28,8 @@ void loop() {
   RemoteXY.left_plot = left;
   RemoteXY.wall_left_plot = wall_left;
 
+  // leds.service();
+  // // leds.clear();
   // Apply colors
   if (isOff()) {
     leds.setPixelColor(0, leds.ColorHSV(23200, 255, 255));  // green
@@ -43,6 +45,18 @@ void loop() {
   leds.setPixelColor(5, distanceColor(wall_right));
   leds.show();
 
+  // Debug which branch we enter with RemoteXY plot
+  RemoteXY.no_obstacles = 0;
+  RemoteXY.obs_lr = 0;
+  RemoteXY.obs_l = 0;
+  RemoteXY.obs_r = 0;
+  RemoteXY.obs_lc = 0;
+  RemoteXY.obs_cr = 0;
+  RemoteXY.more_room_left = 0;
+  RemoteXY.more_room_right = 0;
+  RemoteXY.reverse_left = 0;
+  RemoteXY.reverse_right = 0;
+
   // Control
   if (isOff()) {
     stop();
@@ -52,40 +66,51 @@ void loop() {
     int R = right < RemoteXY.collision_distance;
     if (center < RemoteXY.reverse_proximity) {
       if (wall_left > wall_right) {
+        RemoteXY.reverse_right = 1;
         reverseRight();
       } else {
+        RemoteXY.reverse_left = 1;
         reverseLeft();
       }
     } else if (!L && !C && !R) { // No obstacles
+      RemoteXY.no_obstacles = 1;
       fullSteamAhead(wall_left, wall_right);
     } else if (L && !C && R) { //Obstacle at left and right, squeeze from middle
+      RemoteXY.obs_lr = 1;
       fullSteamAhead(wall_left, wall_right);
     } else if (L && C && !R) { // Obstacle slight leftish, overtake from right
+      RemoteXY.obs_lc = 1;
       fullSteamAhead(wall_left + 300, wall_right - 300);
       //overtakeFromRight((center + left) / 2);
     } else if (L && !C && !R) { // Obstacle far left, overtake from  little left
+      RemoteXY.obs_l = 1;
       fullSteamAhead(wall_left + 200, wall_right - 200);
       //overtakeFromRight(left);
     } else if (!L && C && R) { //Obstacle slight rightish, overtake from little left
+      RemoteXY.obs_cr = 1;
       fullSteamAhead(wall_left - 300, wall_right + 300);
       //overtakeFromLeft((center + right) / 2);
     } else if (!L && !C && R) { //Obstacle far right, overtake from little right
+      RemoteXY.obs_r = 1;
       fullSteamAhead(wall_left - 200, wall_right + 200);
       //overtakeFromLeft(right);
-    } else if (!L && C && !R) { // Something stright at center
+    } else {
+    // } else if (!L && C && !R) { // Something stright at center
       if (wall_left > wall_right) { // More room at left, overtake from left
+        RemoteXY.more_room_left = 1;
         fullSteamAhead(wall_left - 300, wall_right + 300);
         //overtakeFromLeft(center);
       } else { //More room at right, overtake from right
+        RemoteXY.more_room_right = 1;
         fullSteamAhead(wall_left + 300, wall_right - 300);
         //overtakeFromRight(center);
       }
-    } else if (L && C && R) {
-      if (wall_left > wall_right) {
-        overtakeFromLeft(center);
-      } else {
-        overtakeFromRight(center);
-      }
+    // } else if (L && C && R) {
+    //   if (wall_left > wall_right) {
+    //     overtakeFromLeft(center);
+    //   } else {
+    //     overtakeFromRight(center);
+    //   }
     }
   }
 
