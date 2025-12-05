@@ -2,19 +2,20 @@
 //        RemoteXY include library          //
 //////////////////////////////////////////////
 
-int collision_distance;
-int reverse_proximity;
-int max_speed;
-int overtake_speed;
-int reverse_speed;
-int reverse_time;
-int proportional_speed_coef;
-int steering_coef;
-float kp;
-float ki;
-float kd;
-bool remotexy_initialized = false;
-int start_addr;
+struct Conf
+{
+  int16_t collision_distance;
+  int16_t reverse_proximity;
+  int16_t max_speed;
+  int16_t overtake_speed;
+  int16_t reverse_speed;
+  int16_t reverse_time;
+  int8_t proportional_speed_coef;
+  int8_t steering_coef;
+  float kp;
+  float ki;
+  float kd;
+};
 
 // you can enable debug logging to Serial at 115200
 //#define REMOTEXY__DEBUGLOG
@@ -35,61 +36,75 @@ int start_addr;
 #pragma pack(push, 1)
 
 
-uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =  // 593 bytes V21
-  { 254, 27, 0, 42, 0, 0, 0, 11, 0, 1, 2, 0, 3, 2, 0, 5, 2, 0, 7, 2,
-    0, 9, 2, 0, 11, 2, 0, 13, 1, 0, 14, 1, 0, 15, 4, 0, 19, 4, 0, 23,
-    4, 0, 37, 2, 21, 0, 0, 0, 74, 105, 109, 110, 121, 0, 31, 1, 106, 200, 2, 1,
-    0, 30, 0, 67, 13, 6, 24, 8, 85, 2, 26, 67, 41, 6, 24, 8, 85, 2, 26, 67,
-    69, 6, 24, 8, 85, 2, 26, 67, 79, 21, 24, 8, 85, 2, 26, 67, 4, 21, 24, 8,
-    85, 2, 26, 3, 31, 24, 44, 16, 131, 2, 26, 7, 6, 48, 40, 10, 85, 64, 2, 26,
-    7, 57, 48, 40, 10, 85, 64, 2, 26, 7, 6, 65, 40, 10, 85, 64, 2, 26, 7, 56,
-    65, 40, 10, 85, 64, 2, 26, 7, 56, 100, 40, 10, 85, 64, 2, 26, 7, 56, 82, 40,
-    10, 85, 64, 2, 26, 4, 6, 137, 93, 15, 128, 2, 26, 129, 6, 42, 39, 5, 64, 25,
-    99, 111, 108, 108, 105, 115, 105, 111, 110, 32, 100, 105, 115, 116, 97, 110, 99, 101, 0, 129,
-    58, 42, 38, 5, 64, 25, 114, 101, 118, 101, 114, 115, 101, 32, 112, 114, 111, 120, 105, 109,
-    105, 116, 121, 0, 129, 6, 60, 25, 5, 64, 25, 109, 97, 120, 32, 115, 112, 101, 101, 100,
-    0, 129, 57, 60, 34, 5, 64, 25, 111, 118, 101, 114, 116, 97, 107, 101, 32, 115, 112, 101,
-    101, 100, 0, 129, 57, 94, 31, 5, 64, 25, 114, 101, 118, 101, 114, 115, 101, 32, 115, 112,
-    101, 101, 100, 0, 129, 57, 76, 28, 5, 64, 25, 114, 101, 118, 101, 114, 115, 101, 32, 116,
-    105, 109, 101, 0, 129, 7, 132, 67, 5, 64, 25, 112, 114, 111, 112, 111, 114, 116, 105, 111,
-    110, 97, 108, 32, 115, 112, 101, 101, 100, 32, 99, 111, 101, 102, 102, 105, 99, 105, 101, 110,
-    116, 0, 129, 34, 18, 40, 5, 64, 25, 79, 70, 70, 32, 32, 32, 65, 85, 84, 79, 32,
-    32, 77, 65, 78, 0, 4, 6, 158, 93, 15, 128, 2, 26, 129, 8, 154, 43, 5, 64, 25,
-    115, 116, 101, 101, 114, 105, 110, 103, 32, 99, 111, 101, 102, 102, 105, 99, 105, 101, 110, 116,
-    0, 7, 6, 114, 40, 10, 77, 64, 2, 26, 5, 7, 6, 82, 40, 10, 77, 64, 2, 26,
-    5, 129, 6, 109, 6, 5, 64, 25, 107, 100, 0, 129, 6, 77, 6, 5, 64, 25, 107, 112,
-    0, 7, 6, 98, 40, 10, 77, 64, 2, 26, 5, 129, 6, 93, 4, 5, 64, 25, 107, 105,
-    0, 131, 71, 186, 31, 10, 3, 17, 2, 31, 80, 108, 111, 116, 115, 0, 6, 3, 0, 68,
-    0, 0, 106, 86, 53, 8, 36, 135, 94, 31, 233, 87, 97, 108, 108, 32, 108, 101, 102, 116,
-    0, 76, 101, 102, 116, 0, 67, 101, 110, 116, 101, 114, 0, 82, 105, 103, 104, 116, 0, 87,
-    97, 108, 108, 32, 114, 105, 103, 104, 116, 0, 68, 0, 86, 106, 100, 51, 8, 36, 135, 94,
-    87, 97, 108, 108, 32, 100, 105, 102, 102, 0, 80, 73, 68, 32, 111, 117, 116, 112, 117, 116,
-    0, 83, 116, 101, 101, 114, 105, 110, 103, 32, 118, 97, 108, 117, 101, 0, 131, 5, 188, 33,
-    9, 2, 17, 2, 31, 67, 111, 110, 102, 105, 103, 0, 9 };
-
-// this structure defines all the variables and events of your control interface
+uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 667 bytes V21
+  { 254,27,0,82,0,0,0,11,0,1,2,0,3,2,0,5,2,0,7,2,
+  0,9,2,0,11,2,0,13,1,0,14,1,0,15,4,0,19,4,0,23,
+  4,0,111,2,21,0,0,0,74,105,109,110,121,0,31,1,106,200,2,1,
+  0,30,0,67,13,6,24,8,85,2,26,67,41,6,24,8,85,2,26,67,
+  69,6,24,8,85,2,26,67,79,21,24,8,85,2,26,67,4,21,24,8,
+  85,2,26,3,31,24,44,16,131,2,26,7,6,48,40,10,85,64,2,26,
+  7,57,48,40,10,85,64,2,26,7,6,65,40,10,85,64,2,26,7,56,
+  65,40,10,85,64,2,26,7,56,100,40,10,85,64,2,26,7,56,82,40,
+  10,85,64,2,26,4,6,137,93,15,128,2,26,129,6,42,39,5,64,25,
+  99,111,108,108,105,115,105,111,110,32,100,105,115,116,97,110,99,101,0,129,
+  58,42,38,5,64,25,114,101,118,101,114,115,101,32,112,114,111,120,105,109,
+  105,116,121,0,129,6,60,25,5,64,25,109,97,120,32,115,112,101,101,100,
+  0,129,57,60,34,5,64,25,111,118,101,114,116,97,107,101,32,115,112,101,
+  101,100,0,129,57,94,31,5,64,25,114,101,118,101,114,115,101,32,115,112,
+  101,101,100,0,129,57,76,28,5,64,25,114,101,118,101,114,115,101,32,116,
+  105,109,101,0,129,7,132,67,5,64,25,112,114,111,112,111,114,116,105,111,
+  110,97,108,32,115,112,101,101,100,32,99,111,101,102,102,105,99,105,101,110,
+  116,0,129,34,18,40,5,64,25,79,70,70,32,32,32,65,85,84,79,32,
+  32,77,65,78,0,4,6,158,93,15,128,2,26,129,8,154,43,5,64,25,
+  115,116,101,101,114,105,110,103,32,99,111,101,102,102,105,99,105,101,110,116,
+  0,7,6,114,40,10,77,64,2,26,5,7,6,82,40,10,77,64,2,26,
+  5,129,6,109,6,5,64,25,107,100,0,129,6,77,6,5,64,25,107,112,
+  0,7,6,98,40,10,77,64,2,26,5,129,6,93,4,5,64,25,107,105,
+  0,131,69,186,32,11,2,17,2,31,80,108,111,116,115,0,6,4,0,68,
+  0,0,106,64,58,8,94,135,40,31,233,163,177,78,246,105,78,111,32,111,
+  98,115,116,97,99,108,101,115,0,76,82,0,76,0,82,0,76,67,0,67,
+  82,0,82,111,111,109,32,108,101,102,116,0,82,111,111,109,32,114,105,103,
+  104,116,0,82,101,118,32,76,0,82,101,118,32,82,0,131,0,189,34,11,
+  2,17,2,31,67,111,110,102,105,103,0,9,68,244,58,118,70,53,8,36,
+  135,94,204,233,87,97,108,108,76,101,102,116,0,76,101,102,116,0,67,101,
+  110,116,101,114,0,82,105,103,104,116,0,87,97,108,108,82,105,103,104,116,
+  0,68,0,122,106,67,51,8,36,135,94,87,97,108,108,32,100,105,102,102,
+  0,80,73,68,32,111,117,116,112,117,116,0,83,116,101,101,114,105,110,103,
+  32,118,97,108,117,101,0 };
+  
+// this structure defines all the variables and events of your control interface 
 struct {
 
-  // input variables
-  uint8_t mode;                    // from 0 to 3
-  int16_t collision_distance;      // -32768 .. +32767
-  int16_t reverse_proximity;       // -32768 .. +32767
-  int16_t max_speed;               // -32768 .. +32767
-  int16_t overtake_speed;          // -32768 .. +32767
-  int16_t reverse_speed;           // -32768 .. +32767
-  int16_t reverse_time;            // -32768 .. +32767
-  int8_t proportional_speed_coef;  // from 0 to 100
-  int8_t steering_coef;            // from 0 to 100
+    // input variables
+  uint8_t mode; // from 0 to 3
+  int16_t collision_distance; // -32768 .. +32767
+  int16_t reverse_proximity; // -32768 .. +32767
+  int16_t max_speed; // -32768 .. +32767
+  int16_t overtake_speed; // -32768 .. +32767
+  int16_t reverse_speed; // -32768 .. +32767
+  int16_t reverse_time; // -32768 .. +32767
+  int8_t proportional_speed_coef; // from 0 to 100
+  int8_t steering_coef; // from 0 to 100
   float kd;
   float kp;
   float ki;
 
-  // output variables
-  int16_t left;        // -32768 .. +32767
-  int16_t center;      // -32768 .. +32767
-  int16_t right;       // -32768 .. +32767
-  int16_t wall_right;  // -32768 .. +32767
-  int16_t wall_left;   // -32768 .. +32767
+    // output variables
+  int16_t left; // -32768 .. +32767
+  int16_t center; // -32768 .. +32767
+  int16_t right; // -32768 .. +32767
+  int16_t wall_right; // -32768 .. +32767
+  int16_t wall_left; // -32768 .. +32767
+  float no_obstacles;
+  float obs_lr;
+  float obs_l;
+  float obs_r;
+  float obs_lc;
+  float obs_cr;
+  float more_room_left;
+  float more_room_right;
+  float reverse_left;
+  float reverse_right;
   float wall_left_plot;
   float left_plot;
   float center_plot;
@@ -101,23 +116,29 @@ struct {
 
 } RemoteXY;
 
+
 #pragma pack(pop)
 
 /////////////////////////////////////////////
-//           END RemoteXY include          //
+//           END RemfoteXY include          //
 /////////////////////////////////////////////
 
 
 #include <Wire.h>
 #include <VL53L0X.h>
-#include <Adafruit_NeoPixel.h>
-#include <ESP32Servo.h>
 #include <PID_v2.h>
+#include <WS2812FX.h>
+#include <ESP32Servo.h>
 #include <movingAvg.h>
+
+
+#define EEPROM_SIZE 1024 * 4
 
 #define LED_PIN D5
 #define LED_COUNT 6
-Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+WS2812FX leds = WS2812FX(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+Conf conf;
 
 // Create instances
 VL53L0X sensor1;
@@ -217,19 +238,13 @@ void goSteer(int steering_value) {
 }
 
 void go(int s) {
-  if (!isAuto()) {
-    stop();
-    return;
-  }
+  if (!isAuto()) {stop();return;}
   digitalWrite(PH, HIGH);
   analogWrite(EN, s);
 }
 
 void goRev(int s) {
-  if (!isAuto()) {
-    stop();
-    return;
-  }
+  if (!isAuto()) {stop();return;}
   digitalWrite(PH, LOW);
   analogWrite(EN, s);
 }
@@ -262,65 +277,72 @@ bool isMan() {
   return RemoteXY.mode == 2;
 }
 
+bool remotexy_initialized = false;
 void handleRemoteXYUpdate() {
   if (!remotexy_initialized) {
-    RemoteXY.collision_distance = collision_distance;
-    RemoteXY.reverse_proximity = reverse_proximity;
-    RemoteXY.max_speed = max_speed;
-    RemoteXY.overtake_speed = overtake_speed;
-    RemoteXY.reverse_speed = reverse_speed;
-    RemoteXY.reverse_time = reverse_time;
-    RemoteXY.proportional_speed_coef = proportional_speed_coef;
-    RemoteXY.steering_coef = steering_coef;
-    RemoteXY.kp = kp;
-    RemoteXY.ki = ki;
-    RemoteXY.kd = kd;
+    RemoteXY.collision_distance = conf.collision_distance;
+    RemoteXY.reverse_proximity = conf.reverse_proximity;
+    RemoteXY.max_speed = conf.max_speed;
+    RemoteXY.overtake_speed = conf.overtake_speed;
+    RemoteXY.reverse_speed = conf.reverse_speed;
+    RemoteXY.reverse_time = conf.reverse_time;
+    RemoteXY.proportional_speed_coef = conf.proportional_speed_coef;
+    RemoteXY.steering_coef = conf.steering_coef;
+    RemoteXY.kp = conf.kp;
+    RemoteXY.ki = conf.ki;
+    RemoteXY.kd = conf.kd;
     remotexy_initialized = true;
   }
 
-  if (RemoteXY.collision_distance != collision_distance) {
-    collision_distance = RemoteXY.collision_distance;
-    EEPROM.write(start_addr+1, collision_distance);
+  bool anything_changed = false;
+  if (RemoteXY.collision_distance != conf.collision_distance) {
+    conf.collision_distance = RemoteXY.collision_distance;
+    anything_changed = true;
   }
-  if (RemoteXY.reverse_proximity != reverse_proximity) {
-    reverse_proximity = RemoteXY.reverse_proximity;
-    EEPROM.write(start_addr+2, reverse_proximity);
+  if (RemoteXY.reverse_proximity != conf.reverse_proximity) {
+    conf.reverse_proximity = RemoteXY.reverse_proximity;
+    anything_changed = true;
   }
-  if (RemoteXY.max_speed != max_speed) {
-    max_speed = RemoteXY.max_speed;
-    EEPROM.write(start_addr+3, max_speed);
+  if (RemoteXY.max_speed != conf.max_speed) {
+    conf.max_speed = RemoteXY.max_speed;
+    anything_changed = true;
   }
-  if (RemoteXY.overtake_speed != overtake_speed) {
-    overtake_speed = RemoteXY.overtake_speed;
-    EEPROM.write(start_addr+4, overtake_speed);
+  if (RemoteXY.overtake_speed != conf.overtake_speed) {
+    conf.overtake_speed = RemoteXY.overtake_speed;
+    anything_changed = true;
   }
-  if (RemoteXY.reverse_speed != reverse_speed) {
-    reverse_speed = RemoteXY.reverse_speed;
-    EEPROM.write(start_addr+5, reverse_speed);
+  if (RemoteXY.reverse_speed != conf.reverse_speed) {
+    conf.reverse_speed = RemoteXY.reverse_speed;
+    anything_changed = true;
   }
-  if (RemoteXY.reverse_time != reverse_time) {
-    reverse_time = RemoteXY.reverse_time;
-    EEPROM.write(start_addr+6, reverse_time);
+  if (RemoteXY.reverse_time != conf.reverse_time) {
+    conf.reverse_time = RemoteXY.reverse_time;
+    anything_changed = true;
   }
-  if (RemoteXY.proportional_speed_coef != proportional_speed_coef) {
-    proportional_speed_coef = RemoteXY.proportional_speed_coef;
-    EEPROM.write(start_addr+7, proportional_speed_coef);
+  if (RemoteXY.proportional_speed_coef != conf.proportional_speed_coef) {
+    conf.proportional_speed_coef = RemoteXY.proportional_speed_coef;
+    anything_changed = true;
   }
-  if (RemoteXY.steering_coef != steering_coef) {
-    steering_coef = RemoteXY.steering_coef;
-    EEPROM.write(start_addr+8, steering_coef);
+  if (RemoteXY.steering_coef != conf.steering_coef) {
+    conf.steering_coef = RemoteXY.steering_coef;
+    anything_changed = true;
   }
-  if (RemoteXY.kp != kp) {
-    kp = RemoteXY.kp;
-    EEPROM.write(start_addr+9, kp);
+  if (RemoteXY.kp != conf.kp) {
+    conf.kp = RemoteXY.kp;
+    anything_changed = true;
   }
-  if (RemoteXY.ki != ki) {
-    ki = RemoteXY.ki;
-    EEPROM.write(start_addr+10, ki);
+  if (RemoteXY.ki != conf.ki) {
+    conf.ki = RemoteXY.ki;
+    anything_changed = true;
   }
-  if (RemoteXY.kd != kd) {
-    kd = RemoteXY.kd;
-    EEPROM.write(start_addr+11, kd);
+  if (RemoteXY.kd != conf.kd) {
+    conf.kd = RemoteXY.kd;
+    anything_changed = true;
   }
-  EEPROM.commit();
+  if (anything_changed) {
+    Serial.println("Saving to EEPROM");
+    EEPROM.begin(EEPROM_SIZE);
+    EEPROM.put(0, conf);
+    EEPROM.end();
+  }
 }

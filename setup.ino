@@ -1,19 +1,9 @@
 void setup() {
   Serial.begin(115200);
   RemoteXY_Init();
-  EEPROM.begin(RemoteXYEngine.getEepromSize()) + 200;
-  start_addr = RemoteXYEngine.getEepromSize() + 1;
-  collision_distance = EEPROM.read(start_addr+1);
-  reverse_proximity = EEPROM.read(start_addr+2);
-  max_speed = EEPROM.read(start_addr+3);
-  overtake_speed = EEPROM.read(start_addr+4);
-  reverse_speed = EEPROM.read(start_addr+5);
-  reverse_time = EEPROM.read(start_addr+6);
-  proportional_speed_coef = EEPROM.read(start_addr+7);
-  steering_coef = EEPROM.read(start_addr+8);
-  kp = EEPROM.read(start_addr+9);
-  ki = EEPROM.read(start_addr+10);
-  kd = EEPROM.read(start_addr+11);
+  EEPROM.begin(EEPROM_SIZE);
+  EEPROM.get(0, conf);
+  EEPROM.end();
 
   Wire.begin();
 
@@ -21,9 +11,12 @@ void setup() {
   steer.attach(SERVO);
   steer.writeMicroseconds(straight);
 
-  leds.begin();
-  leds.show();
+  leds.init();
   leds.setBrightness(50);
+  leds.setSpeed(200);
+  leds.setMode(FX_MODE_SCAN);
+  leds.start();
+
 
   // Setup pins
   pinMode(XSHUT_1, OUTPUT);
