@@ -161,6 +161,12 @@ const int SERVO = 33;
 const int max_left = 1800;
 const int straight = 1400;
 const int max_right = 1000;
+int last_filtered_steering = 1400;
+
+// Speed Ramping
+int current_speed = 0;
+const int acceleration_step = 15; // How fast to speed up (0-255 range)
+const int deceleration_step = 40; // How fast to slow down (braking should be faster)
 
 // XSHUT pins
 const int XSHUT_1 = D0;
@@ -220,25 +226,49 @@ void fullSteamAhead(int wall_left, int wall_right) {
   RemoteXY.pid_output = output;
   const int steering_value = 1400 + output;
   RemoteXY.steering_value = steering_value;
+
+
   goSteer(steering_value);  // * steering_coef);
 }
 
 void stop() {
   analogWrite(EN, 0);
+  current_speed = 0;
 }
 
 void goSteer(int steering_value) {
-  if (steering_value < max_right) steering_value = max_right;
-  if (steering_value > max_left) steering_value = max_left;
-  steer.writeMicroseconds(steering_value);
+  //low pass filter to smooth out jumpy steering commands (good alpha seems to be somewhere around 0.8)
+  float filter_multiplier = (float)conf.steering_coef / 100;
+  int filtered_steering = filter_multiplier * steering_value + (1.0 - filter_multiplier) * last_filtered_steering;
+  last_filtered_steering = filtered_steering;
+
+  if (filtered_steering < max_right) filtered_steering = max_right;
+  if (filtered_steering > max_left) filtered_steering = max_left;
+  steer.writeMicroseconds(filtered_steering);
   // int steering_delta = abs(straight - steering_value);
   // RemoteXY.speed_delta = map(steering_delta, 0, 400, 0, 150) * (float)RemoteXY.proportional_speed_coef / 100.0;
   // go(RemoteXY.max_speed - RemoteXY.speed_delta);
-  go(RemoteXY.max_speed);
+
+  //Turn adaptive speed
+  float speed_coef = (float)RemoteXY.proportional_speed_coef/100;
+  int max_turn = (max_left - max_right) / 2;
+  //Speed reduction on turning betwee 100 and max_speed times speed coef
+  int speed_delta = map(abs(filtered_steering - straight), 0, max_turn, 100, RemoteXY.max_speed) * speed_coef;
+  go(RemoteXY.max_speed - speed_delta);
 }
 
 void go(int s) {
   if (!isAuto()) {stop();return;}
+
+  // Ramp speed towards target 's'
+  if (current_speed < s) {
+    current_speed += acceleration_step;
+    if (current_speed > s) current_speed = s;
+  } else if (current_speed > s) {
+    current_speed -= deceleration_step;
+    if (current_speed < s) current_speed = s;
+  }
+
   digitalWrite(PH, HIGH);
   analogWrite(EN, s);
 }
@@ -290,7 +320,7 @@ void handleRemoteXYUpdate() {
     RemoteXY.steering_coef = conf.steering_coef;
     RemoteXY.kp = conf.kp;
     RemoteXY.ki = conf.ki;
-    RemoteXY.kd = conf.kd;
+    RemoteXY.kd = 0.1; conf.kd;
     remotexy_initialized = true;
   }
 

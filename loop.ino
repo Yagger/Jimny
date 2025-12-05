@@ -60,7 +60,7 @@ void loop() {
   // Control
   if (isOff()) {
     stop();
-  } else {
+  } else if (false) {
     int L = left < RemoteXY.collision_distance;
     int C = center < RemoteXY.collision_distance;
     int R = right < RemoteXY.collision_distance;
@@ -111,8 +111,10 @@ void loop() {
     //   } else {
     //     overtakeFromRight(center);
     //   }
+    } 
+  } else {
+      fullSteamAhead(wall_left, wall_right);
     }
-  }
 
   // Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", wall_right, right, center, left, wall_left, RemoteXY.mode);
   // Serial.printf("WR:%d,R:%d,C:%d,L:%d,WL:%d\n", wall_right, right, center, left, wall_left);
