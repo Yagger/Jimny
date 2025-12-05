@@ -10,7 +10,6 @@
 
 #include <BLEDevice.h>
 #include <EEPROM.h>
-#include <PID_v2.h>
 
 // RemoteXY connection settings 
 #define REMOTEXY_BLUETOOTH_NAME "Jimny"
@@ -22,28 +21,32 @@
 #pragma pack(push, 1)  
 
 
-uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 419 bytes V21 
-  { 254,15,0,14,0,0,0,8,0,1,2,0,3,2,0,5,2,0,7,2,
-  0,9,2,0,11,2,0,13,1,0,14,1,0,128,1,21,0,0,0,74,
-  105,109,110,121,0,31,1,106,200,1,1,25,0,67,13,6,24,8,85,2,
-  26,67,41,6,24,8,85,2,26,67,69,6,24,8,85,2,26,67,79,21,
-  24,8,85,2,26,67,4,21,24,8,85,2,26,3,31,24,44,16,131,2,
-  26,7,6,58,40,10,85,64,2,26,7,57,58,40,10,85,64,2,26,7,
-  6,78,40,10,85,64,2,26,7,56,79,40,10,85,64,2,26,7,6,98,
-  40,10,85,64,2,26,7,56,98,40,10,85,64,2,26,4,6,123,93,15,
-  128,2,26,129,6,52,39,5,64,25,99,111,108,108,105,115,105,111,110,32,
-  100,105,115,116,97,110,99,101,0,129,58,52,38,5,64,25,114,101,118,101,
-  114,115,101,32,112,114,111,120,105,109,105,116,121,0,129,6,72,25,5,64,
-  25,109,97,120,32,115,112,101,101,100,0,129,57,73,34,5,64,25,111,118,
-  101,114,116,97,107,101,32,115,112,101,101,100,0,129,6,92,31,5,64,25,
-  114,101,118,101,114,115,101,32,115,112,101,101,100,0,129,57,92,28,5,64,
-  25,114,101,118,101,114,115,101,32,116,105,109,101,0,129,7,115,67,5,64,
-  25,112,114,111,112,111,114,116,105,111,110,97,108,32,115,112,101,101,100,32,
-  99,111,101,102,102,105,99,105,101,110,116,0,129,34,18,40,5,64,25,79,
-  70,70,32,32,32,65,85,84,79,32,32,77,65,78,0,67,7,183,40,10,
-  78,2,26,3,129,8,176,26,5,64,25,115,112,101,101,100,32,100,101,108,
-  116,97,0,4,6,149,93,15,128,2,26,129,8,142,43,5,64,25,115,116,
-  101,101,114,105,110,103,32,99,111,101,102,102,105,99,105,101,110,116,0 };
+uint8_t const PROGMEM RemoteXY_CONF_PROGMEM[] =   // 482 bytes V21 
+  { 254,27,0,5,1,0,0,11,0,1,2,0,3,2,0,5,2,0,7,2,
+  0,9,2,0,11,2,0,13,1,0,14,1,0,15,4,0,19,4,0,23,
+  4,0,182,1,21,0,0,0,74,105,109,110,121,0,31,1,106,200,1,1,
+  31,0,67,13,6,24,8,85,2,26,67,41,6,24,8,85,2,26,67,69,
+  6,24,8,85,2,26,67,79,21,24,8,85,2,26,67,4,21,24,8,85,
+  2,26,3,31,24,44,16,131,2,26,7,6,48,40,10,85,64,2,26,7,
+  57,48,40,10,85,64,2,26,7,6,65,40,10,85,64,2,26,7,56,65,
+  40,10,85,64,2,26,7,56,100,40,10,85,64,2,26,7,56,82,40,10,
+  85,64,2,26,4,6,137,93,15,128,2,26,129,6,42,39,5,64,25,99,
+  111,108,108,105,115,105,111,110,32,100,105,115,116,97,110,99,101,0,129,58,
+  42,38,5,64,25,114,101,118,101,114,115,101,32,112,114,111,120,105,109,105,
+  116,121,0,129,6,60,25,5,64,25,109,97,120,32,115,112,101,101,100,0,
+  129,57,60,34,5,64,25,111,118,101,114,116,97,107,101,32,115,112,101,101,
+  100,0,129,57,94,31,5,64,25,114,101,118,101,114,115,101,32,115,112,101,
+  101,100,0,129,57,76,28,5,64,25,114,101,118,101,114,115,101,32,116,105,
+  109,101,0,129,7,132,67,5,64,25,112,114,111,112,111,114,116,105,111,110,
+  97,108,32,115,112,101,101,100,32,99,111,101,102,102,105,99,105,101,110,116,
+  0,129,34,18,40,5,64,25,79,70,70,32,32,32,65,85,84,79,32,32,
+  77,65,78,0,67,7,183,90,10,68,2,26,251,129,8,176,14,5,64,25,
+  100,101,98,117,103,0,4,6,158,93,15,128,2,26,129,8,154,43,5,64,
+  25,115,116,101,101,114,105,110,103,32,99,111,101,102,102,105,99,105,101,110,
+  116,0,7,6,114,40,10,77,64,2,26,5,7,6,82,40,10,77,64,2,
+  26,5,129,6,109,6,5,64,25,107,100,0,129,6,77,6,5,64,25,107,
+  112,0,7,6,98,40,10,77,64,2,26,5,129,6,93,4,5,64,25,107,
+  105,0 };
   
 // this structure defines all the variables and events of your control interface 
 struct {
@@ -58,6 +61,9 @@ struct {
   int16_t reverse_time; // -32768 .. +32767
   int8_t proportional_speed_coef; // from 0 to 100
   int8_t steering_coef; // from 0 to 100
+  float kd;
+  float kp;
+  float ki;
 
     // output variables
   int16_t left; // -32768 .. +32767
@@ -65,9 +71,10 @@ struct {
   int16_t right; // -32768 .. +32767
   int16_t wall_right; // -32768 .. +32767
   int16_t wall_left; // -32768 .. +32767
-  float speed_delta;
+  char debug[251]; // string UTF8 end zero
 
 } RemoteXY;   
+
 
 
 #pragma pack(pop)
@@ -81,6 +88,7 @@ struct {
 #include <Adafruit_NeoPixel.h>
 #include <ESP32Servo.h>
 #include <PID_v2.h>
+#include <movingAvg.h>
 
 #define LED_PIN D5
 #define LED_COUNT 6
@@ -127,8 +135,8 @@ const int LIGHTS_REAR = 32;
 #define ADDR_4 0x33
 #define ADDR_5 0x34
 
-double Kp = 0.7, Ki = 0, Kd=0.07
-PID_v3 straightPID(Kp, Ki, Kd, PID::Direct);
+double Kp = 1, Ki = 0, Kd=0;
+PID_v2 straightPID(Kp, Ki, Kd, PID::Direct);
 
 uint32_t distanceColor(int mm) {
   // https://colorpicker.dev/#00aeff
@@ -158,7 +166,8 @@ void fullSteamAhead(int wall_left, int wall_right) {
   //int steering_value = map(wall_diff, -1200, 1200, max_left, max_right);
   //float steering_coef = map(RemoteXY.steering_coef, 0, 100, 0, 200) / 100;
   const double output = straightPID.Run(wall_diff);
-  const int steering_value = 1400 - 400 * output;
+  const int steering_value = 1400 + output;
+  sprintf(RemoteXY.debug, "%d|%d|%d", wall_diff, output, steering_value);
   goSteer(steering_value); // * steering_coef);
 }
 
@@ -167,7 +176,6 @@ void stop() {
 }
 
 void goSteer(int steering_value) {
-  RemoteXY.speed_delta = steering_value;
   if (steering_value < max_right) steering_value = max_right;
   if (steering_value > max_left) steering_value = max_left;
   steer.writeMicroseconds(steering_value);
@@ -196,6 +204,7 @@ void reverse_(int steering_value) {
   RemoteXYEngine.delay(300);
   goRev(RemoteXY.reverse_speed);
   RemoteXYEngine.delay(600);
+  digitalWrite(LIGHTS_REAR, LOW);
 }
 
 void reverseLeft() {
@@ -210,29 +219,8 @@ bool isArmed() {
   return RemoteXY.mode > 0;
 }
 
-struct MovingAverage {
-  static const int N = 3;
-  int buf[N];
-  int idx = 0;
-  int16_t sum = 0;
-  bool filled = false;
-
-  int16_t update(int16_t v) {
-    sum -= buf[idx];
-    buf[idx] = v;
-    sum += v;
-
-    idx++;
-    if (idx >= N) { idx = 0; filled = true; }
-
-    return filled ? sum / N : sum / idx;
-  }
-};
-MovingAverage wallRightMA, rightMA, centerMA, leftMA, wallLeftMA;
-
-
-double consKp = 1, consKi = 0.05, consKd = 0.25;
-PID_v2 myPID(consKp, consKi, consKd, PID::Direct);
+const int N = 10;
+movingAvg wallRightMA(N), rightMA(N), centerMA(N), leftMA(N), wallLeftMA(N);
 
 void setup() {
   Serial.begin(115200);
@@ -246,7 +234,13 @@ void setup() {
 
   leds.begin();
   leds.show();
-  leds.setBrightness(20);
+  leds.setBrightness(50);
+
+  wallRightMA.begin();
+  rightMA.begin();
+  centerMA.begin();
+  leftMA.begin();
+  wallLeftMA.begin();
 
   // Setup pins
   pinMode(XSHUT_1, OUTPUT);
@@ -285,8 +279,8 @@ void setup() {
   straightPID.Start(0,    // input
               1400, // current output
               0);   // setpoint
-  straightPID.SetOutputLimits(-1, 1);
-  straightPID.SetSampleTime(loop_delay);3
+  straightPID.SetOutputLimits(-400, 400);
+  straightPID.SetSampleTime(loop_delay);
 }
 
 void loop() {
@@ -300,12 +294,27 @@ void loop() {
   // RemoteXY.reverse_time = 600;
   // RemoteXY.proportional_speed_coef = 50;
   // RemoteXY.steering_coef = 50;
+  // RemoteXY.kp = 1;
+  // RemoteXY.ki = 0;
+  // RemoteXY.kd = 0;
 
-  RemoteXY.wall_right = wallRightMA.update(sensor1.readRangeContinuousMillimeters());
-  RemoteXY.right = rightMA.update(sensor2.readRangeContinuousMillimeters());
-  RemoteXY.center = centerMA.update(sensor3.readRangeContinuousMillimeters());
-  RemoteXY.left = leftMA.update(sensor4.readRangeContinuousMillimeters());
-  RemoteXY.wall_left = wallLeftMA.update(sensor5.readRangeContinuousMillimeters());
+  // PID
+  straightPID.SetTunings(RemoteXY.kp, RemoteXY.ki, RemoteXY.kd);
+
+  wallRightMA.reading(sensor1.readRangeContinuousMillimeters());
+  RemoteXY.wall_right = wallRightMA.getAvg();
+
+  rightMA.reading(sensor2.readRangeContinuousMillimeters());
+  RemoteXY.right = rightMA.getAvg();
+
+  centerMA.reading(sensor3.readRangeContinuousMillimeters());
+  RemoteXY.center = centerMA.getAvg();
+
+  leftMA.reading(sensor4.readRangeContinuousMillimeters());
+  RemoteXY.left = leftMA.getAvg();
+
+  wallLeftMA.reading(sensor5.readRangeContinuousMillimeters());
+  RemoteXY.wall_left = wallLeftMA.getAvg();
 
   // Apply colors
   if (RemoteXY.mode == 0) {
