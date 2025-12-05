@@ -56,23 +56,29 @@ void loop() {
       } else {
         reverseLeft();
       }
-    } else if (!L && !C && !R) {
+    } else if (!L && !C && !R) { // No obstacles
       fullSteamAhead(wall_left, wall_right);
-    } else if (L && !C && R) {
+    } else if (L && !C && R) { //Obstacle at left and right, squeeze from middle
       fullSteamAhead(wall_left, wall_right);
-    } else if (L && C && !R) {
-      overtakeFromRight((center + left) / 2);
-    } else if (L && !C && !R) {
-      overtakeFromRight(left);
-    } else if (!L && C && R) {
-      overtakeFromLeft((center + right) / 2);
-    } else if (!L && !C && R) {
-      overtakeFromLeft(right);
-    } else if (!L && C && !R) {
-      if (wall_left > wall_right) {
-        overtakeFromLeft(center);
-      } else {
-        overtakeFromRight(center);
+    } else if (L && C && !R) { // Obstacle slight leftish, overtake from right
+      fullSteamAhead(wall_left + 300, wall_right - 300);
+      //overtakeFromRight((center + left) / 2);
+    } else if (L && !C && !R) { // Obstacle far left, overtake from  little left
+      fullSteamAhead(wall_left + 200, wall_right - 200);
+      //overtakeFromRight(left);
+    } else if (!L && C && R) { //Obstacle slight rightish, overtake from little left
+      fullSteamAhead(wall_left - 300, wall_right + 300);
+      //overtakeFromLeft((center + right) / 2);
+    } else if (!L && !C && R) { //Obstacle far right, overtake from little right
+      fullSteamAhead(wall_left - 200, wall_right + 200);
+      //overtakeFromLeft(right);
+    } else if (!L && C && !R) { // Something stright at center
+      if (wall_left > wall_right) { // More room at left, overtake from left
+        fullSteamAhead(wall_left - 300, wall_right + 300);
+        //overtakeFromLeft(center);
+      } else { //More room at right, overtake from right
+        fullSteamAhead(wall_left + 300, wall_right - 300);
+        //overtakeFromRight(center);
       }
     } else if (L && C && R) {
       if (wall_left > wall_right) {
