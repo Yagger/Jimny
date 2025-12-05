@@ -94,13 +94,12 @@ struct {
 #define LED_COUNT 6
 Adafruit_NeoPixel leds(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-
 // Create instances
-VL53L0X sensor1;
-VL53L0X sensor2;
-VL53L0X sensor3;
-VL53L0X sensor4;
-VL53L0X sensor5;
+VL53L0X sensor1; movingAvg sensor1avg(6);
+VL53L0X sensor2; movingAvg sensor2avg(6);
+VL53L0X sensor3; movingAvg sensor3avg(6);
+VL53L0X sensor4; movingAvg sensor4avg(6);
+VL53L0X sensor5; movingAvg sensor5avg(6);
 
 //General
 const int loop_delay = 30;
@@ -186,13 +185,13 @@ void goSteer(int steering_value) {
 }
 
 void go(int s) {
-  if (!isArmed()) {stop();return;}
+  if (!isAuto()) {stop(); return;}
   digitalWrite(PH, HIGH);
   analogWrite(EN, s);
 }
 
 void goRev(int s) {
-  if (!isArmed()) {stop();return;}
+  if (!isAuto()) {stop(); return;}
   digitalWrite(PH, LOW);
   analogWrite(EN, s);
 }
@@ -215,12 +214,15 @@ void reverseRight() {
   reverse_(max_right);
 }
 
-bool isArmed() {
-  return RemoteXY.mode > 0;
+bool isOff() {
+  return RemoteXY.mode == 0;
 }
-
-const int N = 10;
-movingAvg wallRightMA(N), rightMA(N), centerMA(N), leftMA(N), wallLeftMA(N);
+bool isAuto() {
+  return RemoteXY.mode == 1;
+}
+bool isMan() {
+  return RemoteXY.mode == 2;
+}
 
 void setup() {
   Serial.begin(115200);
@@ -235,12 +237,6 @@ void setup() {
   leds.begin();
   leds.show();
   leds.setBrightness(50);
-
-  wallRightMA.begin();
-  rightMA.begin();
-  centerMA.begin();
-  leftMA.begin();
-  wallLeftMA.begin();
 
   // Setup pins
   pinMode(XSHUT_1, OUTPUT);
@@ -269,11 +265,11 @@ void setup() {
   digitalWrite(XSHUT_5, HIGH); RemoteXYEngine.delay(10); sensor5.init(); sensor5.setAddress(ADDR_5);
 
   // Start ranging
-  sensor1.startContinuous(5);
-  sensor2.startContinuous(5);
-  sensor3.startContinuous(5);
-  sensor4.startContinuous(5);
-  sensor5.startContinuous(5);
+  sensor1.startContinuous(5); sensor1avg.begin();
+  sensor2.startContinuous(5); sensor2avg.begin();
+  sensor3.startContinuous(5); sensor3avg.begin();
+  sensor4.startContinuous(5); sensor4avg.begin();
+  sensor5.startContinuous(5); sensor5avg.begin();
 
   // PID
   straightPID.Start(0,    // input
@@ -299,74 +295,81 @@ void loop() {
   // RemoteXY.kd = 0;
 
   // PID
+  if (isOff()) {
+    straightPID.SetMode(MANUAL); // https://github.com/imax9000/Arduino-PID-Library/blob/master/PID_v2.h#L25
+  } else {
+    straightPID.SetMode(AUTOMATIC);
+  }
   straightPID.SetTunings(RemoteXY.kp, RemoteXY.ki, RemoteXY.kd);
 
-  wallRightMA.reading(sensor1.readRangeContinuousMillimeters());
-  RemoteXY.wall_right = wallRightMA.getAvg();
+  int wall_right = sensor1avg.reading(sensor1.readRangeContinuousMillimeters());
+  int right = sensor2avg.reading(sensor2.readRangeContinuousMillimeters());
+  int center = sensor3avg.reading(sensor3.readRangeContinuousMillimeters());
+  int left = sensor4avg.reading(sensor4.readRangeContinuousMillimeters());
+  int wall_left = sensor5avg.reading(sensor5.readRangeContinuousMillimeters());
 
-  rightMA.reading(sensor2.readRangeContinuousMillimeters());
-  RemoteXY.right = rightMA.getAvg();
-
-  centerMA.reading(sensor3.readRangeContinuousMillimeters());
-  RemoteXY.center = centerMA.getAvg();
-
-  leftMA.reading(sensor4.readRangeContinuousMillimeters());
-  RemoteXY.left = leftMA.getAvg();
-
-  wallLeftMA.reading(sensor5.readRangeContinuousMillimeters());
-  RemoteXY.wall_left = wallLeftMA.getAvg();
+  RemoteXY.wall_right = wall_right;
+  RemoteXY.right = right;
+  RemoteXY.center = center;
+  RemoteXY.left = left;
+  RemoteXY.wall_left = wall_left;
 
   // Apply colors
-  if (RemoteXY.mode == 0) {
+  if (isOff()) {
     leds.setPixelColor(0, leds.ColorHSV(23200, 255, 255)); // green
-  } else if (RemoteXY.mode == 1) {
+  } else if (isAuto()) {
     leds.setPixelColor(0, leds.ColorHSV(0, 255, 255)); // red
-  } else if (RemoteXY.mode == 2) {
+  } else if (isMan()) {
     leds.setPixelColor(0, leds.ColorHSV(36400, 255, 255)); // blue
   }
-  leds.setPixelColor(1, distanceColor(RemoteXY.wall_left));
-  leds.setPixelColor(2, distanceColor(RemoteXY.left));
-  leds.setPixelColor(3, distanceColor(RemoteXY.center));
-  leds.setPixelColor(4, distanceColor(RemoteXY.right));
-  leds.setPixelColor(5, distanceColor(RemoteXY.wall_right));
+  leds.setPixelColor(1, distanceColor(wall_left));
+  leds.setPixelColor(2, distanceColor(left));
+  leds.setPixelColor(3, distanceColor(center));
+  leds.setPixelColor(4, distanceColor(right));
+  leds.setPixelColor(5, distanceColor(wall_right));
   leds.show();
 
   // Control
-  int L = RemoteXY.left < RemoteXY.collision_distance;
-  int C = RemoteXY.center < RemoteXY.collision_distance;
-  int R = RemoteXY.right < RemoteXY.collision_distance;
-  if (RemoteXY.center < RemoteXY.reverse_proximity) {
-    if (RemoteXY.wall_left > RemoteXY.wall_right) {
-      reverseRight();
-    } else {
-      reverseLeft();
-    }
-  } else if (!L && !C && !R) {
-    fullSteamAhead(RemoteXY.wall_left, RemoteXY.wall_right);
-  } else if (L && !C && R) {
-    fullSteamAhead(RemoteXY.wall_left, RemoteXY.wall_right);
-  } else if (L && C && !R) {
-    overtakeFromRight((RemoteXY.center+RemoteXY.left)/2);
-  } else if (L && !C && !R) {
-    overtakeFromRight(RemoteXY.left);
-  } else if (!L && C && R) {
-    overtakeFromLeft((RemoteXY.center + RemoteXY.right)/2);
-  } else if (!L && !C && R) {
-    overtakeFromLeft(RemoteXY.right);
-  } else if (!L && C && !R) {
-    if (RemoteXY.wall_left > RemoteXY.wall_right) {
-      overtakeFromLeft(RemoteXY.center);
-    } else {
-      overtakeFromRight(RemoteXY.center);
-    }
-  } else if (L && C && R) {
-    if (RemoteXY.wall_left > RemoteXY.wall_right) {
-      overtakeFromLeft(RemoteXY.center);
-    } else {
-      overtakeFromRight(RemoteXY.center);
+  if (isOff()) {
+    stop();
+  } else {
+    int L = left < RemoteXY.collision_distance;
+    int C = center < RemoteXY.collision_distance;
+    int R = right < RemoteXY.collision_distance;
+    if (center < RemoteXY.reverse_proximity) {
+      if (wall_left > wall_right) {
+        reverseRight();
+      } else {
+        reverseLeft();
+      }
+    } else if (!L && !C && !R) {
+      fullSteamAhead(wall_left, wall_right);
+    } else if (L && !C && R) {
+      fullSteamAhead(wall_left, wall_right);
+    } else if (L && C && !R) {
+      overtakeFromRight((center+left)/2);
+    } else if (L && !C && !R) {
+      overtakeFromRight(left);
+    } else if (!L && C && R) {
+      overtakeFromLeft((center + right)/2);
+    } else if (!L && !C && R) {
+      overtakeFromLeft(right);
+    } else if (!L && C && !R) {
+      if (wall_left > wall_right) {
+        overtakeFromLeft(center);
+      } else {
+        overtakeFromRight(center);
+      }
+    } else if (L && C && R) {
+      if (wall_left > wall_right) {
+        overtakeFromLeft(center);
+      } else {
+        overtakeFromRight(center);
+      }
     }
   }
   
-  Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", RemoteXY.wall_right, RemoteXY.right, RemoteXY.center, RemoteXY.left, RemoteXY.wall_left, RemoteXY.mode);
+  // Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", wall_right, right, center, left, wall_left, RemoteXY.mode);
+  Serial.printf("WR:%d,R:%d,C:%d,L:%d,WL:%d\n", wall_right, right, center, left, wall_left);
   RemoteXYEngine.delay(loop_delay);
 }
