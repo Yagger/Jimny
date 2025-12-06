@@ -60,7 +60,7 @@ void loop() {
   // Control
   if (isOff()) {
     stop();
-  } else  {
+  } else {
     static int ramp_left = 0;
     static int ramp_right = 0;
     int L = left < RemoteXY.collision_distance;
