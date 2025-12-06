@@ -162,7 +162,10 @@ const int SERVO = 33;
 const int max_left = 1800;
 const int straight = 1400;
 const int max_right = 1000;
+const int slight_turn = 50;
+const int hard_turn = 100;
 int last_filtered_steering = 1400;
+int steering_offset = 0;
 
 // Speed Ramping
 int current_speed = 0;
@@ -239,6 +242,7 @@ void stop() {
 
 void goSteer(int steering_value) {
   //low pass filter to smooth out jumpy steering commands (good alpha seems to be somewhere around 0.8)
+  steering_value = steering_value + steering_offset;
   float filter_multiplier = (float)conf.steering_coef / 100;
   int filtered_steering = filter_multiplier * steering_value + (1.0 - filter_multiplier) * last_filtered_steering;
   last_filtered_steering = filtered_steering;
@@ -253,7 +257,7 @@ void goSteer(int steering_value) {
   //Turn adaptive speed
   float speed_coef = (float)RemoteXY.proportional_speed_coef/100;
   int max_turn = (max_left - max_right) / 2;
-  //Speed reduction on turning betwee 100 and max_speed times speed coef
+  //Speed reduction on turning between 100 and max_speed times speed coef
   int speed_delta = map(abs(filtered_steering - straight), 0, max_turn, 100, RemoteXY.max_speed) * speed_coef;
   go(RemoteXY.max_speed - speed_delta);
 }
