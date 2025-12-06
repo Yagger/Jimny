@@ -303,15 +303,12 @@ void reverseRight() {
 }
 
 bool isOff() {
-  isRunning = false;
   return RemoteXY.mode == 0;
 }
 bool isAuto() {
-  isRunning = true;
   return RemoteXY.mode == 1;
 }
 bool isMan() {
-  isRunning = false;
   return RemoteXY.mode == 2;
 }
 

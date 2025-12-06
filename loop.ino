@@ -59,11 +59,12 @@ void loop() {
 
   // Control
   if (isOff()) {
+    isRunning = false;
     stop();
   } else {
     if (!isRunning) {
-      RemoteXYEngine.delay(5000);
       isRunning = true;
+      delay(5000);
     }
     static int ramp_left = 0;
     static int ramp_right = 0;
