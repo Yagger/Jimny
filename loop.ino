@@ -61,6 +61,10 @@ void loop() {
   if (isOff()) {
     stop();
   } else {
+    if (!isRunning) {
+      RemoteXYEngine.delay(5000);
+      isRunning = true;
+    }
     static int ramp_left = 0;
     static int ramp_right = 0;
     int L = left < RemoteXY.collision_distance;

@@ -154,6 +154,7 @@ movingAvg sensor5avg(6);
 
 //General
 const int loop_delay = 30;
+bool isRunning = false;
 
 // Steering
 Servo steer;
@@ -298,12 +299,15 @@ void reverseRight() {
 }
 
 bool isOff() {
+  isRunning = false;
   return RemoteXY.mode == 0;
 }
 bool isAuto() {
+  isRunning = true;
   return RemoteXY.mode == 1;
 }
 bool isMan() {
+  isRunning = false;
   return RemoteXY.mode == 2;
 }
 
