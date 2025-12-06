@@ -60,7 +60,9 @@ void loop() {
   // Control
   if (isOff()) {
     stop();
-  } else if (false) {
+  } else  {
+    static int ramp_left = 0;
+    static int ramp_right = 0;
     int L = left < RemoteXY.collision_distance;
     int C = center < RemoteXY.collision_distance;
     int R = right < RemoteXY.collision_distance;
@@ -74,48 +76,46 @@ void loop() {
       }
     } else if (!L && !C && !R) { // No obstacles
       RemoteXY.no_obstacles = 1;
+      ramp_left = ramp_right = 0;
       fullSteamAhead(wall_left, wall_right);
     } else if (L && !C && R) { //Obstacle at left and right, squeeze from middle
       RemoteXY.obs_lr = 1;
+      ramp_left = ramp_right = 0;
       fullSteamAhead(wall_left, wall_right);
     } else if (L && C && !R) { // Obstacle slight leftish, overtake from right
       RemoteXY.obs_lc = 1;
-      fullSteamAhead(wall_left + 300, wall_right - 300);
-      //overtakeFromRight((center + left) / 2);
+      if(ramp_right < 30) ramp_right++;
+      if(ramp_left < 30) ramp_left++;
+      fullSteamAhead(wall_left - (400 * ramp_right/30), wall_right + (400 * ramp_left/30));
     } else if (L && !C && !R) { // Obstacle far left, overtake from  little left
       RemoteXY.obs_l = 1;
-      fullSteamAhead(wall_left + 200, wall_right - 200);
-      //overtakeFromRight(left);
+      if(ramp_right < 20) ramp_right++;
+      if(ramp_left < 20) ramp_left++;
+      fullSteamAhead(wall_left - (300 * ramp_right/20), wall_right + (300 * ramp_left/20));
     } else if (!L && C && R) { //Obstacle slight rightish, overtake from little left
       RemoteXY.obs_cr = 1;
-      fullSteamAhead(wall_left - 300, wall_right + 300);
-      //overtakeFromLeft((center + right) / 2);
+      if(ramp_right < 30) ramp_right++;
+      if(ramp_left < 30) ramp_left++;
+      fullSteamAhead(wall_left + (400 * ramp_left/30), wall_right - (400 * ramp_right/30));
     } else if (!L && !C && R) { //Obstacle far right, overtake from little right
       RemoteXY.obs_r = 1;
-      fullSteamAhead(wall_left - 200, wall_right + 200);
-      //overtakeFromLeft(right);
+      if(ramp_right < 20) ramp_right++;
+      if(ramp_left < 20) ramp_left++;
+      fullSteamAhead(wall_left + (300 * ramp_left/20), wall_right - (300 * ramp_right/20));
     } else {
-    // } else if (!L && C && !R) { // Something stright at center
       if (wall_left > wall_right) { // More room at left, overtake from left
         RemoteXY.more_room_left = 1;
-        fullSteamAhead(wall_left - 300, wall_right + 300);
-        //overtakeFromLeft(center);
+        if(ramp_right < 30) ramp_right++;
+        if(ramp_left < 30) ramp_left++;
+        fullSteamAhead(wall_left + (400 * ramp_left/30), wall_right - (400 * ramp_right/30));
       } else { //More room at right, overtake from right
         RemoteXY.more_room_right = 1;
-        fullSteamAhead(wall_left + 300, wall_right - 300);
-        //overtakeFromRight(center);
+        if(ramp_right < 30) ramp_right++;
+        if(ramp_left < 30) ramp_left++;
+        fullSteamAhead(wall_left - (400 * ramp_right/30), wall_right + (400 * ramp_left/30));
       }
-    // } else if (L && C && R) {
-    //   if (wall_left > wall_right) {
-    //     overtakeFromLeft(center);
-    //   } else {
-    //     overtakeFromRight(center);
-    //   }
     } 
-  } else {
-      fullSteamAhead(wall_left, wall_right);
-    }
-
+  }
   // Serial.printf("WR:%6d  R:%6d  C:%6d  L:%6d  WL:%6d MODE:%6d\n", wall_right, right, center, left, wall_left, RemoteXY.mode);
   // Serial.printf("WR:%d,R:%d,C:%d,L:%d,WL:%d\n", wall_right, right, center, left, wall_left);
   RemoteXYEngine.delay(loop_delay);
